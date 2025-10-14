@@ -1,14 +1,16 @@
 // app/modal/task-detail.tsx
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import TabBar from '../components/TabBar';
+import TabBar from '../components/BottomBar';
+import { Image } from 'expo-image';
+import { Task } from "../../types/task";
 
 
 export default function TaskDetailModal() {
     const router = useRouter();
     const { task } = useLocalSearchParams();
 
-    const taskData = task ? JSON.parse(task as string) : null;
+    const taskData: Task | null = task ? JSON.parse(task as string) : null
 
     return (
         <View style={styles.container}>
@@ -21,11 +23,25 @@ export default function TaskDetailModal() {
             </TouchableOpacity>
 
             <Text style={styles.title}>{taskData?.title}</Text>
-            <Text style={styles.description}>{taskData?.description}</Text>
+            <Text>Reported By: </Text>
 
+            <Text style={{ color: "#878787ff", marginTop: 40 }}>Description:</Text>
+
+            <View style={styles.detailCard}>
+                <Text style={styles.description}>{taskData?.description}</Text>
+            </View>
+
+            <View style={styles.avatarContainer}>
+                {taskData?.assignee.map((user) => (
+                    <View key={user.id}>
+                        <Image style={styles.avatarImg} contentFit='contain' source={user.avatar}></Image>
+                    </View>
+                ))}
+            </View>
             <View style={styles.tabBarContainer}>
                 <TabBar />
             </View>
+
 
         </View>
 
@@ -51,8 +67,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     description: {
-        fontSize: 16,
-        color: '#666',
+        fontSize: 17,
+        color: '#000000ff',
     },
     tabBarContainer: {
         position: 'absolute',
@@ -60,5 +76,30 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
     },
+    avatarImg: {
+        width: 50,
+        height: 50,
+        backgroundColor: '#eee',
+        borderRadius: 20,
+        marginTop: 30,
+        margin: 10
+    },
+    detailCard: {
+        alignItems: "flex-start",
+        backgroundColor: '#e1dedeff',
+        borderRadius: 10,
+        padding: 12,
+        margin: 12,
+        width: 320,
+        height: 200,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        borderColor: '#e5e7eb',
+    },
+    avatarContainer: {
+        flexDirection: "row",
+        alignItems: "flex-start",
+    }
 
 });

@@ -2,33 +2,69 @@ import { useState } from 'react';
 import {
     View,
     Text,
-    TextInput,
     TouchableOpacity,
     StyleSheet,
     ScrollView,
-    Modal  // 👈 Modal'ı import et
+    Modal,
+    TextInput
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import DropDownPicker from 'react-native-dropdown-picker';
+import GeneralBtn from "../components/GeneralBtn";
+import { Task } from "../../types/task";
+
 
 interface CreateTaskModalProps {
-    handleClose: () => void; // fonksiyon tipini belirledik
+    handleClose: () => void;
+    onSave: (newTask: Task, status: string) => void;
 }
 
-export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
+export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModalProps) {
 
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [assignee, setAssignee] = useState('');
-    const [status, setStatus] = useState('');
+    const [title, setTitle] = useState<string>('');
+    const [description, setDescription] = useState<string>('');
+    //const [status, setStatus] = useState<string>('');
+
+    const [open, setOpen] = useState<boolean>(false);
+    const [assignee, setAssignee] = useState<string[]>([]);
+    const [items, setItems] = useState([
+        { label: 'Alice', value: 'alice' },
+        { label: 'Bob', value: 'bob' },
+    ]);
+
+    const [openStatus, setOpenStatus] = useState<boolean>(false);
+    const [valueStatus, setValueStatus] = useState<string | null>(null);
+    const [itemsStatus, setItemsStatus] = useState([
+        { label: 'Todo', value: 'todo' },
+        { label: 'Backlog', value: 'backlog' },
+        { label: 'Inprogress', value: 'inprogress' },
+    ]);
 
 
 
     const handleCreateTask = () => {
-        console.log('New task:', { title, description });
+        if (!valueStatus) {
+            alert("Please select a status");
+            return;
+        }
+
+        // Seçilen isimleri assignee formatına çevir
+        const selectedAssignees = assignee.map((name, index) => ({
+            id: String(Date.now() + index), // benzersiz id
+            name,
+            avatar: "" // şimdilik avatar yok, istersen sabit avatar atayabilirsin
+        }));
+
+        const newTask: Task = {
+            id: String(Date.now()),
+            title,
+            description,
+            assignee: selectedAssignees, // artık boş değil
+        };
+
+        onSave(newTask, valueStatus);
         handleClose();
     };
-
 
     return (
         <Modal
@@ -40,13 +76,25 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <View style={styles.header}>
-                        <Text style={styles.title}>Create New Task</Text>
                         <TouchableOpacity onPress={handleClose}>
                             <AntDesign name="close" size={24} color="black" />
                         </TouchableOpacity>
                     </View>
 
                     <ScrollView contentContainerStyle={styles.content}>
+                        <Text style={styles.label}>Status</Text>
+                        <DropDownPicker
+                            open={openStatus}
+                            value={valueStatus}
+                            items={itemsStatus}
+                            setOpen={setOpenStatus}
+                            setValue={setValueStatus}
+                            setItems={setItemsStatus}
+                            placeholder="Select status"
+                            style={styles.dropdown}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                            listMode="SCROLLVIEW"
+                        />
                         <Text style={styles.label}>Task Title</Text>
                         <TextInput
                             style={styles.input}
@@ -63,24 +111,24 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
                             placeholder="Enter task description"
                             multiline
                         />
-                        <Text style={styles.label}>Assignee</Text>
-                        <TextInput
-                            style={styles.input}
+                        <DropDownPicker
+                            multiple={true}
+                            min={0}
+                            max={5}
+                            open={open}
                             value={assignee}
-                            onChangeText={setAssignee}
-                            placeholder="Assigne"
-                        />
-                        <Text style={styles.label}>Status</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={status}
-                            onChangeText={setStatus}
-                            placeholder="Status"
+                            items={items}
+                            setOpen={setOpen}
+                            setValue={setAssignee}
+                            setItems={setItems}
+                            placeholder="Select names"
+                            style={styles.dropdown}
+                            dropDownContainerStyle={styles.dropdownContainer}
+                            listMode="SCROLLVIEW"
                         />
 
-                        <TouchableOpacity style={styles.createButton} onPress={handleCreateTask}>
-                            <Text style={styles.createButtonText}>Create Task</Text>
-                        </TouchableOpacity>
+                        <GeneralBtn handleCreateTask={handleCreateTask} color="red" selfText="Save" />
+
                     </ScrollView>
                 </View>
             </View>
@@ -145,16 +193,16 @@ const styles = StyleSheet.create({
         height: 100,
         textAlignVertical: 'top',
     },
-    createButton: {
-        backgroundColor: '#007AFF',
-        padding: 15,
+    dropdown: {
+        borderColor: '#ccc',
         borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 20,
+        marginBottom: 20,
+
     },
-    createButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: '600',
+    dropdownContainer: {
+        borderColor: '#ccc',
+        borderWidth: 1,
+        marginBottom: 20,
+
     },
 });

@@ -1,12 +1,18 @@
 import { View, TouchableOpacity, StyleSheet, } from 'react-native'
 import React from 'react'
 import Feather from '@expo/vector-icons/Feather';
+import { useRouter } from 'expo-router';
+
 
 export default function TabBar() {
+
+
+    const router = useRouter();
+
     return (
         <View style={styles.tabBar}>
             <TouchableOpacity>
-                <Feather style={{ margin: 25 }} name="home" size={26} color="black" />
+                <Feather style={{ margin: 25 }} name="home" size={26} color="black" onPress={() => router.push("/")} />
             </TouchableOpacity>
         </View>
     )

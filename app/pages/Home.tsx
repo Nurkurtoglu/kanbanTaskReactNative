@@ -1,0 +1,216 @@
+import {
+    View, StyleSheet, ScrollView,
+    TouchableOpacity,
+} from 'react-native'
+import React from 'react'
+import KanbanRow from '../components/KanbanBoard';
+import TabBar from '../components/BottomBar';
+import CreateTaskModal from '../modal/create-task';
+import { Ionicons } from '@expo/vector-icons';
+import Feather from '@expo/vector-icons/Feather';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { Image } from 'expo-image';
+import { backlogTasks, inProgressTasks, todoTasks } from "../../datas/statusData";
+import { useState } from "react"
+import { Task } from "../../types/task";
+
+
+export default function Home() {
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [backlog, setBacklog] = useState<Task[]>(backlogTasks);
+    const [todo, setTodo] = useState<Task[]>(todoTasks);
+    const [inProgress, setInProgress] = useState<Task[]>(inProgressTasks);
+
+
+    return (
+        <View style={{ flex: 1 }}>
+            <View style={styles.container}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <Image style={styles.img} contentFit='contain' source={require("../../assets/images/rastMobile.png")} />
+                    <View style={styles.iconsContainer}>
+                        <TouchableOpacity>
+                            <Ionicons name="search" size={24} color="white" />
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                            <Feather name="settings" size={24} color="white" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Kanban Board */}
+                <ScrollView style={styles.board}>
+
+                    <KanbanRow
+                        title="Backlog"
+                        tasks={backlog}
+                        color="red"
+                    />
+
+                    <KanbanRow
+                        title="Todo"
+                        tasks={todo}
+                        color="#8581ecff"
+                    />
+
+                    <KanbanRow
+                        title="Inprogress"
+                        tasks={inProgress}
+                        color="green"
+                    />
+
+
+                </ScrollView>
+                {/* Home icon */}
+                <TabBar />
+
+
+                {/* Modal aç butonu */}
+                <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={() => setIsModalVisible(true)}
+                >
+                    <AntDesign name="plus" size={24} color="white" />
+                </TouchableOpacity>
+
+                {/* Modal */}
+
+                {isModalVisible && (
+                    <CreateTaskModal
+                        handleClose={() => setIsModalVisible(false)}
+                        onSave={(newTask, valueStatus) => {
+                            console.log("Yeni görev geldi:", newTask, "Status:", valueStatus);
+
+                            if (valueStatus === "todo") {
+                                setTodo((prev) => [...prev, newTask]);
+                            } else if (valueStatus === "inprogress") {
+                                setInProgress((prev) => [...prev, newTask]);
+                            } else if (valueStatus === "backlog") {
+                                setBacklog((prev) => [...prev, newTask]);
+                            }
+                        }}
+                    />
+                )}
+
+
+            </View>
+        </View>
+    )
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5',
+    },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 15,
+        backgroundColor: '#5A56E9',
+        borderBottomColor: '#e0e0e0',
+
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    subtitle: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 4,
+    },
+    board: {
+        padding: 10,
+    },
+    columnHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    colorDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 20,
+        marginRight: 8,
+        backgroundColor: "#8581ecff"
+    },
+    columnTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#333',
+    },
+    taskCount: {
+        color: '#888',
+        fontSize: 14,
+        marginLeft: 6,
+    },
+
+    taskCard: {
+        backgroundColor: '#fafafa',
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 8,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    taskTitle: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#333',
+        marginBottom: 4,
+    },
+    taskDescription: {
+        fontSize: 12,
+        color: '#666',
+        lineHeight: 16,
+    },
+    emptyText: {
+        textAlign: 'center',
+        color: '#999',
+        fontSize: 14,
+        marginTop: 20,
+    },
+    addButton: {
+        position: 'absolute',
+        bottom: 120,
+        right: 20,
+        backgroundColor: '#5A56E9',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    img: {
+        width: 100,
+        height: 70
+    },
+    boardCard: {
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 30,
+        height: 200,
+        margin: 20,
+        borderWidth: 1,
+        borderColor: "#dcd6d6ff",
+        backgroundColor: "#fff",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 4,
+    },
+    iconsContainer: {
+        flexDirection: "row",
+        gap: 10
+    }
+});

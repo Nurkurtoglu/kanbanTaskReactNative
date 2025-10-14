@@ -1,6 +1,7 @@
-// Task type'ını tanımla
-export interface Task {
+export interface User {
     id: string;
-    title: string;
-    description?: string;
+    name: string;
+    surname?: string;
+    email?: string;
+    avatar: string;
 }
