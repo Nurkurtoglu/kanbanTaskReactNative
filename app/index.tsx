@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function HomePage() {
 
-    const [isAuth, setIsAuth] = useState<boolean>(true)
+    const [isAuth, setIsAuth] = useState<boolean>(false)
 
     return (
         isAuth ? <Home /> : <LoginPage />

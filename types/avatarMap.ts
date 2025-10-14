@@ -1,8 +1,13 @@
-// örn: avatars.ts
-export const avatars = {
-    user1: require("../assets/images/man.png"),
-    user2: require("../assets/images/man22.png"),
-    user3: require("../assets/images/man33.png"),
-    woman1: require("../assets/images/woman11.png"),
-    woman2: require("../assets/images/woman22.png"),
-};
+import { ImageSourcePropType } from "react-native"
+
+
+export const avatars: ImageSourcePropType[] = [
+    require("../assets/images/man.png"),
+    require("../assets/images/man2.png"),
+    require("../assets/images/man3.png"),
+    require("../assets/images/man4.png"),
+    require("../assets/images/woman1.png"),
+    require("../assets/images/woman2.png"),
+    require("../assets/images/woman3.png"),
+    require("../assets/images/woman4.png"),
+];

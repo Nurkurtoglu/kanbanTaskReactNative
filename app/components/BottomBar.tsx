@@ -12,7 +12,7 @@ export default function TabBar() {
     return (
         <View style={styles.tabBar}>
             <TouchableOpacity>
-                <Feather style={{ margin: 25 }} name="home" size={26} color="black" onPress={() => router.push("/")} />
+                <Feather style={{ margin: 25 }} name="home" size={26} color="black" onPress={() => router.back()} />
             </TouchableOpacity>
         </View>
     )

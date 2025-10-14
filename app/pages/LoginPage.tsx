@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import React, { useState } from 'react';
 import GeneralBtn from '../components/GeneralBtn';
 import { useRouter } from 'expo-router';
@@ -9,40 +9,51 @@ export default function LoginPage() {
     const router = useRouter();
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <Image style={styles.img} source={require('../../assets/images/login.png')} />
-                <Text style={styles.welcome}>Welcome Back</Text>
-                <Text style={styles.subText}>Sign in to continue</Text>
-            </View>
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"} // iOS için padding, Android için height
+        >
+            <ScrollView
+                contentContainerStyle={styles.container}
+                keyboardShouldPersistTaps="handled" // klavye açıkken tıklama sorunu yaşamamak için
+            >
 
-            <View style={styles.inputsContainer}>
-                <TextInput
-                    style={styles.input}
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="Email"
-                    keyboardType="email-address"
-                />
-                <TextInput
-                    style={styles.input}
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="Password"
-                    secureTextEntry
-                />
-            </View>
-
-            <View style={styles.buttonsContainer}>
-                <GeneralBtn color="#6661ebff" selfText="LOGIN" />
-                <View style={styles.registerContainer}>
-                    <Text>Don't have an account?</Text>
-                    <TouchableOpacity onPress={() => router.push('/pages/SignupPage')}>
-                        <Text style={styles.registerText}> Register</Text>
-                    </TouchableOpacity>
+                <View style={styles.header}>
+                    <Image style={styles.img} source={require('../../assets/images/login.png')} />
+                    <Text style={styles.welcome}>Welcome Back</Text>
+                    <Text style={styles.subText}>Sign in to continue</Text>
                 </View>
-            </View>
-        </View>
+
+                <View style={styles.inputsContainer}>
+                    <TextInput
+                        style={styles.input}
+                        value={email}
+                        onChangeText={setEmail}
+                        placeholder="Email"
+                        placeholderTextColor="#666"
+                        keyboardType="email-address"
+                    />
+                    <TextInput
+                        style={styles.input}
+                        value={password}
+                        onChangeText={setPassword}
+                        placeholder="Password"
+                        placeholderTextColor="#666"
+                        secureTextEntry
+                    />
+                </View>
+
+                <View style={styles.buttonsContainer}>
+                    <GeneralBtn color="#6661ebff" selfText="LOGIN" />
+                    <View style={styles.registerContainer}>
+                        <Text>Don't have an account?</Text>
+                        <TouchableOpacity onPress={() => router.push('/pages/SignupPage')}>
+                            <Text style={styles.registerText}> Register</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView >
     );
 }
 
@@ -51,16 +62,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f5f5f5',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: "space-evenly",
         gap: 40,
     },
     header: {
         alignItems: 'center',
         gap: 10,
+
     },
     img: {
-        width: 180,
-        height: 180,
+        width: 200,
+        height: 200,
     },
     welcome: {
         color: '#6661ebff',

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
 import GeneralBtn from "../components/GeneralBtn";
 import { useRouter } from 'expo-router'
+import { avatars } from "../../types/avatarMap"
+
 
 export default function RegisterPage() {
     const [name, setName] = useState<string>("");
@@ -12,22 +14,21 @@ export default function RegisterPage() {
     const router = useRouter();
 
 
-    const avatars = [
-        require("../../assets/images/man.png"),
-        require("../../assets/images/man22.png"),
-        require("../../assets/images/man33.png"),
-        require("../../assets/images/woman11.png"),
-        require("../../assets/images/woman22.png"),
-        //require("../../assets/avatars/avatar6.png"),
-        //require("../../assets/avatars/avatar7.png"),
-        //require("../../assets/avatars/avatar8.png"),
-    ];
+    // const avatars = [
+    //     require("../../assets/images/man1.png"),
+    //     require("../../assets/images/man2.png"),
+    //     require("../../assets/images/man3.png"),
+    //     require("../../assets/images/man4.png"),
+    //     require("../../assets/images/woman1.png"),
+    //     require("../../assets/images/woman2.png"),
+    //     require("../../assets/images/woman3.png"),
+    //     require("../../assets/images/woman4.png"),
+    // ];
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.header}>
                 <Image style={styles.img} source={require("../../assets/images/signup.png")} />
-                <Text style={styles.title}>Create Your Account</Text>
             </View>
 
             <View style={styles.formContainer}>
@@ -36,12 +37,14 @@ export default function RegisterPage() {
                     value={name}
                     onChangeText={setName}
                     placeholder="Name"
+                    placeholderTextColor="#666"
                 />
                 <TextInput
                     style={styles.input}
                     value={surname}
                     onChangeText={setSurname}
                     placeholder="Surname"
+                    placeholderTextColor="#666"
                 />
                 <TextInput
                     style={styles.input}
@@ -49,12 +52,14 @@ export default function RegisterPage() {
                     onChangeText={setEmail}
                     placeholder="Email"
                     keyboardType="email-address"
+                    placeholderTextColor="#666"
                 />
                 <TextInput
                     style={styles.input}
                     value={password}
                     onChangeText={setPassword}
                     placeholder="Password"
+                    placeholderTextColor="#666"
                     secureTextEntry
                 />
 
@@ -95,7 +100,7 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: "center",
-        marginBottom: 30,
+        margin: 30,
     },
     img: {
         width: 180,

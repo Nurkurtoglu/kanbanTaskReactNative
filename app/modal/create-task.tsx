@@ -23,7 +23,7 @@ export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModal
 
     const [title, setTitle] = useState<string>('');
     const [description, setDescription] = useState<string>('');
-    //const [status, setStatus] = useState<string>('');
+    const [valueStatus, setValueStatus] = useState<string | null>(null);
 
     const [open, setOpen] = useState<boolean>(false);
     const [assignee, setAssignee] = useState<string[]>([]);
@@ -33,7 +33,6 @@ export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModal
     ]);
 
     const [openStatus, setOpenStatus] = useState<boolean>(false);
-    const [valueStatus, setValueStatus] = useState<string | null>(null);
     const [itemsStatus, setItemsStatus] = useState([
         { label: 'Todo', value: 'todo' },
         { label: 'Backlog', value: 'backlog' },
@@ -59,7 +58,7 @@ export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModal
             id: String(Date.now()),
             title,
             description,
-            assignee: selectedAssignees, // artık boş değil
+            assignee: selectedAssignees,
         };
 
         onSave(newTask, valueStatus);
