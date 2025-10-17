@@ -14,16 +14,6 @@ export default function RegisterPage() {
     const router = useRouter();
 
 
-    // const avatars = [
-    //     require("../../assets/images/man1.png"),
-    //     require("../../assets/images/man2.png"),
-    //     require("../../assets/images/man3.png"),
-    //     require("../../assets/images/man4.png"),
-    //     require("../../assets/images/woman1.png"),
-    //     require("../../assets/images/woman2.png"),
-    //     require("../../assets/images/woman3.png"),
-    //     require("../../assets/images/woman4.png"),
-    // ];
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -36,14 +26,14 @@ export default function RegisterPage() {
                     style={styles.input}
                     value={name}
                     onChangeText={setName}
-                    placeholder="Name"
+                    placeholder="İsim"
                     placeholderTextColor="#666"
                 />
                 <TextInput
                     style={styles.input}
                     value={surname}
                     onChangeText={setSurname}
-                    placeholder="Surname"
+                    placeholder="Soyisim"
                     placeholderTextColor="#666"
                 />
                 <TextInput
@@ -58,12 +48,12 @@ export default function RegisterPage() {
                     style={styles.input}
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="Password"
+                    placeholder="Şifre"
                     placeholderTextColor="#666"
                     secureTextEntry
                 />
 
-                <Text style={styles.avatarLabel}>Choose your avatar</Text>
+                <Text style={styles.avatarLabel}>Avatarını seç</Text>
                 <View style={styles.avatarContainer}>
                     {avatars.map((avatar, index) => (
                         <TouchableOpacity key={index} onPress={() => setSelectedAvatar(index)}>
@@ -80,11 +70,11 @@ export default function RegisterPage() {
             </View>
 
             <View style={styles.buttonContainer}>
-                <GeneralBtn color="#6661ebff" selfText="REGISTER" />
+                <GeneralBtn color="#6661ebff" selfText="ÜYE OL" />
                 <View style={styles.loginRow}>
-                    <Text>Already have an account?</Text>
+                    <Text>Zaten bir hesabınız mı var?</Text>
                     <TouchableOpacity onPress={() => router.push("/pages/LoginPage")}>
-                        <Text style={{ color: "#6661ebff" }}> Login</Text>
+                        <Text style={{ color: "#6661ebff", marginHorizontal: 5 }}>Giriş</Text>
                     </TouchableOpacity>
                 </View>
             </View>

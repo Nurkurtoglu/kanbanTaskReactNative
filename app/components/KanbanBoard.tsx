@@ -1,33 +1,36 @@
 import { View, Text, TouchableOpacity, FlatList } from 'react-native'
-import React from 'react'
+import React, { use } from 'react'
 import { StyleSheet } from 'react-native'
-import { Task } from "../../types/task"
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-
+import { useAppSelector } from "../../store/hooks"
 
 
 // Props interface'ini tanımla
 interface KanbanColumnProps {
     title: string;
-    tasks: Task[];
     color?: string;
+    status: string;
     onTaskPress?: (taskId: string) => void;
     onColumnPress?: () => void;
 }
 
 
-export default function KanbanBoard({ title, tasks, color }: KanbanColumnProps) {
+export default function KanbanBoard({ title, color, status }: KanbanColumnProps) {
+
+    const { tasks } = useAppSelector((state) => state.tasks);
+    const filteredTasks = tasks.filter((t) => t.status === status);
+
     return (
         <View>
             <View style={styles.columnHeader}>
                 <View style={[styles.colorDot, { backgroundColor: color }]} />
                 <Text style={styles.columnTitle}>{title}</Text>
-                <Text style={styles.taskCount}>({tasks.length})</Text>
+                <Text style={styles.taskCount}>({filteredTasks.length})</Text>
             </View>
 
             <FlatList
-                data={tasks}
+                data={filteredTasks}
                 keyExtractor={(item) => item.id}
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -42,7 +45,11 @@ export default function KanbanBoard({ title, tasks, color }: KanbanColumnProps) 
                         <View style={styles.userInfo}>
                             {item.assignee.map((user) => (
                                 <View key={user.id} style={{ marginRight: 8 }}>
-                                    <Image style={styles.avatarImg} contentFit='contain' source={user.avatar}></Image>
+                                    <Image
+                                        style={styles.avatarImg}
+                                        contentFit='contain'
+                                        source={user.avatar}>
+                                    </Image>
                                     <Text style={{ fontSize: 15 }}>{user.name}</Text>
                                 </View>
                             ))}
@@ -51,8 +58,8 @@ export default function KanbanBoard({ title, tasks, color }: KanbanColumnProps) 
                 )}
             />
 
-            {(!tasks || tasks.length === 0) && (
-                <Text style={styles.emptyText}>No tasks available</Text>
+            {(!filteredTasks || filteredTasks.length === 0) && (
+                <Text style={styles.emptyText}>Mevcut görev yok</Text>
             )}
 
         </View>

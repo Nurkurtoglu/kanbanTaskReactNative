@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, Alert } from 'react-native';
 import React, { useState } from 'react';
 import GeneralBtn from '../components/GeneralBtn';
 import { useRouter } from 'expo-router';
@@ -7,6 +7,10 @@ export default function LoginPage() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const router = useRouter();
+
+    const routeHomePage = () => {
+        email == "test@gmail.com" && password === "123456" ? router.push("/pages/Home") : Alert.alert("Hata", "Email adresi veya şifre doğru giriniz.")
+    }
 
     return (
         <KeyboardAvoidingView
@@ -20,8 +24,8 @@ export default function LoginPage() {
 
                 <View style={styles.header}>
                     <Image style={styles.img} source={require('../../assets/images/login.png')} />
-                    <Text style={styles.welcome}>Welcome Back</Text>
-                    <Text style={styles.subText}>Sign in to continue</Text>
+                    <Text style={styles.welcome}>Tekrar Hoş Geldiniz</Text>
+                    <Text style={styles.subText}>Devam etmek için oturum açın</Text>
                 </View>
 
                 <View style={styles.inputsContainer}>
@@ -37,18 +41,18 @@ export default function LoginPage() {
                         style={styles.input}
                         value={password}
                         onChangeText={setPassword}
-                        placeholder="Password"
+                        placeholder="Şifre"
                         placeholderTextColor="#666"
                         secureTextEntry
                     />
                 </View>
 
                 <View style={styles.buttonsContainer}>
-                    <GeneralBtn color="#6661ebff" selfText="LOGIN" />
+                    <GeneralBtn color="#6661ebff" selfText="Giriş" onPress={routeHomePage} />
                     <View style={styles.registerContainer}>
-                        <Text>Don't have an account?</Text>
+                        <Text>Hesabınız yok mu?</Text>
                         <TouchableOpacity onPress={() => router.push('/pages/SignupPage')}>
-                            <Text style={styles.registerText}> Register</Text>
+                            <Text style={styles.registerText}>Kayıt olun</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

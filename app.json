@@ -4,7 +4,7 @@
     "slug": "kanbanTask",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/SplashScreen.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "kanbantask",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -19,25 +19,19 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.kanbanTask"
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/SplashScreen.png",
-          "imageWidth": 1080,
           "resizeMode": "cover",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000",
-            "image": "./assets/images/SplashScreen.png"
-          }
+          "backgroundColor": "#ffffff"
         }
       ]
     ],

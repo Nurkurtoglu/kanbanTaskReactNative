@@ -12,14 +12,19 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import DropDownPicker from 'react-native-dropdown-picker';
 import GeneralBtn from "../components/GeneralBtn";
 import { Task } from "../../types/task";
+import { LogBox } from 'react-native';
+import { useAppDispatch } from "../../store/hooks";
+import { addTask } from "../../store/slices/tasksSlice";
+
+
+LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
 
 
 interface CreateTaskModalProps {
     handleClose: () => void;
-    onSave: (newTask: Task, status: string) => void;
 }
 
-export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModalProps) {
+export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
 
     const [title, setTitle] = useState<string>('');
     const [description, setDescription] = useState<string>('');
@@ -39,31 +44,48 @@ export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModal
         { label: 'Inprogress', value: 'inprogress' },
     ]);
 
+    const dispatch = useAppDispatch();
+
+
 
 
     const handleCreateTask = () => {
         if (!valueStatus) {
-            alert("Please select a status");
+            alert("Lütfen bir durum seçin!");
             return;
         }
 
-        // Seçilen isimleri assignee formatına çevir
+        if (!title.trim() || !description.trim()) {
+            alert("Lütfen başlık ve açıklama girin!");
+            return;
+        }
+
+        // Seçilen kullanıcıları assignee formatına çevir
         const selectedAssignees = assignee.map((name, index) => ({
-            id: String(Date.now() + index), // benzersiz id
+            id: String(Date.now() + index),
             name,
-            avatar: "" // şimdilik avatar yok, istersen sabit avatar atayabilirsin
+            avatar: undefined
         }));
 
         const newTask: Task = {
             id: String(Date.now()),
             title,
             description,
+            status: valueStatus,  // 👈 dikkat: valueStatus burada kullanılıyor
             assignee: selectedAssignees,
         };
 
-        onSave(newTask, valueStatus);
-        handleClose();
+        // Redux slice'a ekle
+        dispatch(addTask(newTask));
+
+        // Inputları sıfırla
+        setTitle('');
+        setDescription('');
+        setAssignee([]);
+        setValueStatus(null);
+        alert("Görev başarıyla eklendi!");
     };
+
 
     return (
         <Modal
@@ -81,7 +103,7 @@ export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModal
                     </View>
 
                     <ScrollView contentContainerStyle={styles.content}>
-                        <Text style={styles.label}>Status</Text>
+                        <Text style={styles.label}>Durum</Text>
                         <DropDownPicker
                             open={openStatus}
                             value={valueStatus}
@@ -89,25 +111,25 @@ export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModal
                             setOpen={setOpenStatus}
                             setValue={setValueStatus}
                             setItems={setItemsStatus}
-                            placeholder="Select status"
+                            placeholder="Durum seçin"
                             style={styles.dropdown}
                             dropDownContainerStyle={styles.dropdownContainer}
                             listMode="SCROLLVIEW"
                         />
-                        <Text style={styles.label}>Task Title</Text>
+                        <Text style={styles.label}>Görev Başlığı</Text>
                         <TextInput
                             style={styles.input}
                             value={title}
                             onChangeText={setTitle}
-                            placeholder="Enter task title"
+                            placeholder="Görev başlığını girin"
                         />
 
-                        <Text style={styles.label}>Description</Text>
+                        <Text style={styles.label}>Açıklama</Text>
                         <TextInput
                             style={[styles.input, styles.textArea]}
                             value={description}
                             onChangeText={setDescription}
-                            placeholder="Enter task description"
+                            placeholder="Görev açıklamasını girin"
                             multiline
                         />
                         <DropDownPicker
@@ -120,13 +142,13 @@ export default function CreateTaskModal({ handleClose, onSave }: CreateTaskModal
                             setOpen={setOpen}
                             setValue={setAssignee}
                             setItems={setItems}
-                            placeholder="Select names"
+                            placeholder="İsim seçin"
                             style={styles.dropdown}
                             dropDownContainerStyle={styles.dropdownContainer}
                             listMode="SCROLLVIEW"
                         />
 
-                        <GeneralBtn handleCreateTask={handleCreateTask} color="red" selfText="Save" />
+                        <GeneralBtn handleCreateTask={handleCreateTask} color="red" selfText="Kaydet" />
 
                     </ScrollView>
                 </View>

@@ -1,7 +1,6 @@
 // app/modal/task-detail.tsx
 import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import TabBar from '../components/BottomBar';
 import { Image } from 'expo-image';
 import { Task } from "../../types/task";
 import { Snackbar } from 'react-native-paper';
@@ -57,9 +56,9 @@ export default function TaskDetailModal() {
             )}
 
 
-            <Text>Reported By: </Text>
+            <Text>Raporlayan: </Text>
 
-            <Text style={{ color: "#878787ff", marginTop: 40 }}>Description:</Text>
+            <Text style={{ color: "#878787ff", marginTop: 40 }}>Açıklama:</Text>
 
             {/* Açıklama Kartı */}
             <View style={styles.detailCard}>
@@ -112,7 +111,7 @@ export default function TaskDetailModal() {
                 style={styles.snackbar}
                 theme={{ colors: { onSurface: 'white' } }}
             >
-                <Text style={{ color: "#fff" }}>✅ Task updated successfully!</Text>
+                <Text style={{ color: "#fff" }}>✅ Görev başarıyla güncellendi!</Text>
             </Snackbar>
 
         </View>

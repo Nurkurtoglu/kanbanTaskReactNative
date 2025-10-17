@@ -6,14 +6,18 @@ interface GenralBtnProps {
     handleCreateTask?: () => void,
     color: string,
     selfText: string
+    onPress?: () => void;
 }
 
-export default function GeneralBtn({ handleCreateTask, color, selfText }: GenralBtnProps) {
+export default function GeneralBtn({ handleCreateTask, color, selfText, onPress }: GenralBtnProps) {
 
 
     return (
         <View>
-            <TouchableOpacity style={[styles.createButton, { backgroundColor: color }]} onPress={handleCreateTask}>
+            <TouchableOpacity style={[styles.createButton, { backgroundColor: color }]} onPress={() => {
+                handleCreateTask?.();
+                onPress?.();
+            }}>
                 <Text style={styles.createButtonText}>{selfText}</Text>
             </TouchableOpacity>
         </View>

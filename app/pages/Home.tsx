@@ -10,18 +10,13 @@ import { Ionicons } from '@expo/vector-icons';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Image } from 'expo-image';
-import { backlogTasks, inProgressTasks, todoTasks } from "../../datas/statusData";
 import { useState } from "react"
-import { Task } from "../../types/task";
+
 
 
 export default function Home() {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [backlog, setBacklog] = useState<Task[]>(backlogTasks);
-    const [todo, setTodo] = useState<Task[]>(todoTasks);
-    const [inProgress, setInProgress] = useState<Task[]>(inProgressTasks);
-
 
     return (
         <View style={{ flex: 1 }}>
@@ -44,20 +39,20 @@ export default function Home() {
 
                     <KanbanRow
                         title="Backlog"
-                        tasks={backlog}
                         color="red"
+                        status="backlog"
                     />
 
                     <KanbanRow
                         title="Todo"
-                        tasks={todo}
                         color="#8581ecff"
+                        status="todo"
                     />
 
                     <KanbanRow
                         title="Inprogress"
-                        tasks={inProgress}
                         color="green"
+                        status="inProgress"
                     />
 
 
@@ -79,17 +74,6 @@ export default function Home() {
                 {isModalVisible && (
                     <CreateTaskModal
                         handleClose={() => setIsModalVisible(false)}
-                        onSave={(newTask, valueStatus) => {
-                            console.log("Yeni görev geldi:", newTask, "Status:", valueStatus);
-
-                            if (valueStatus === "todo") {
-                                setTodo((prev) => [...prev, newTask]);
-                            } else if (valueStatus === "inprogress") {
-                                setInProgress((prev) => [...prev, newTask]);
-                            } else if (valueStatus === "backlog") {
-                                setBacklog((prev) => [...prev, newTask]);
-                            }
-                        }}
                     />
                 )}
 

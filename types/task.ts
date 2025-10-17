@@ -2,8 +2,9 @@
 import { User } from "./user"
 
 export interface Task {
-    id: string;
-    title: string;
-    description?: string;
-    assignee: User[];
+    id: string
+    status: string
+    title: string
+    description: string
+    assignee: User[]
 }
