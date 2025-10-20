@@ -6,5 +6,6 @@ export interface Task {
     status: string
     title: string
     description: string
-    assignee: User[]
+    assignees: User[]
+    created_by?: string;
 }

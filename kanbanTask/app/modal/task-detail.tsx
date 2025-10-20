@@ -4,36 +4,102 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Task } from "../../types/task";
 import { Snackbar } from 'react-native-paper';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
+import { avatars } from '@/types/avatarMap';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { User } from '@/types/user';
+import { updateTaskData } from '@/store/apiwithThunks/tasksApi';
 
 export default function TaskDetailModal() {
     const router = useRouter();
     const { task } = useLocalSearchParams();
 
-    const taskData: Task | null = task ? JSON.parse(task as string) : null
+    const { currentUser: usersList } = useAppSelector((state) => state.user);
+    const dispatch = useAppDispatch();
+
+    const taskData: Task = task ? JSON.parse(task as string) : null
 
     const [editableTask, setEditableTask] = useState<Task | null>(taskData);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [snackbarVisible, setSnackbarVisible] = useState<boolean>(false);
 
+    // Dropdown state'leri
+    const [openAssignee, setOpenAssignee] = useState(false);
+    const [assigneeItems, setAssigneeItems] = useState<{ label: string, value: string }[]>([]);
+    const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+
+    // Dropdown items'ı hazırla
+    useEffect(() => {
+        if (usersList) {
+            const items = usersList
+                .filter((user: User) => user.id) // id'si olmayanları filtrele
+                .map((user: User) => ({
+                    label: `${user.name} ${user.surname}`,
+                    value: user.id! // Non-null assertion (!) kullan
+                }));
+            setAssigneeItems(items);
+        }
+    }, [usersList]);
+
+    useEffect(() => {
+        if (isEditing && editableTask?.assignees) {
+            const assigneeIds = editableTask.assignees
+                .map(user => user.id)
+                .filter((id): id is string => id !== undefined); // undefined'ları filtrele
+            setSelectedAssignees(assigneeIds);
+        }
+    }, [isEditing, editableTask]);
+
     const handleEditToggle = () => {
-        setIsEditing((prev) => !prev);
+        if (!isEditing) {
+            // Edit moda geçiyoruz
+            setIsEditing(true);
+        } else {
+            // Edit moddan çıkıyoruz, değişiklikleri kaydetmeden
+            setIsEditing(false);
+            setEditableTask(taskData); // Orijinal veriye dön
+        }
     };
+
     const handleSave = () => {
-        setIsEditing(false);
-        setSnackbarVisible(true);
 
-        // Burada backend'e update isteği atabilirsin (örneğin Firebase veya API)
-        console.log("Updated task:", editableTask);
+        if (!editableTask?.id) {
+            alert("Task ID bulunamadı!");
+            return;
+        }
+
+        // Seçilen assignee'leri User objelerine çevir
+        const updatedAssignees = usersList
+            .filter(user => user.id && selectedAssignees.includes(user.id)) // user.id kontrolü ekle
+            .map(user => user.id!) // Non-null assertion
+            .filter(Boolean); // Güvence için
+
+
+        const updatedTask = {
+            ...editableTask,
+            assignees: updatedAssignees as any
+        };
+
+        // Redux action'ını dispatch et
+        dispatch(updateTaskData(updatedTask))
+            .unwrap()
+            .then(() => {
+                setSnackbarVisible(true);
+                console.log("Görev güncellendi");
+            })
+            .catch(err => {
+                alert("Güncelleme hatası: " + err);
+            });
     };
 
+    const reporterId = taskData?.created_by;
+    const reporter = usersList?.find(user => user.id === reporterId);
 
     return (
         <View style={styles.container}>
-
             <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => router.back()}
@@ -55,8 +121,9 @@ export default function TaskDetailModal() {
                 <Text style={styles.title}>{editableTask?.title}</Text>
             )}
 
+            {/* Raporlayan */}
+            <Text>Raporlayan: {reporter?.name} {reporter?.surname}</Text>
 
-            <Text>Raporlayan: </Text>
 
             <Text style={{ color: "#878787ff", marginTop: 40 }}>Açıklama:</Text>
 
@@ -70,38 +137,56 @@ export default function TaskDetailModal() {
                         onChangeText={(text) =>
                             setEditableTask((prev) => prev ? { ...prev, description: text } : prev)
                         }
-                        autoFocus={true}
                     />
                 ) : (
                     <Text style={styles.description}>{editableTask?.description}</Text>
                 )}
             </View>
 
+            {/* Atanan Kişiler */}
+            <Text style={styles.assigneesLabel}>Atanan Kişiler:</Text>
 
-            <View style={styles.avatarandbutton}>
-                {/* Avatarlar */}
+            {isEditing ? (
+                // Edit mod: Dropdown
+                <DropDownPicker
+                    multiple={true}
+                    open={openAssignee}
+                    value={selectedAssignees}
+                    items={assigneeItems}
+                    setOpen={setOpenAssignee}
+                    setValue={setSelectedAssignees}
+                    setItems={setAssigneeItems}
+                    placeholder="Kişi seçin"
+                    style={styles.dropdown}
+                    dropDownContainerStyle={styles.dropdownContainer}
+                    listMode="SCROLLVIEW"
+                />
+            ) : (
+                // View mod: Avatar listesi
                 <View style={styles.avatarContainer}>
-                    {editableTask?.assignee.map((user) => (
-                        <View key={user.id}>
+                    {editableTask?.assignees.map((user) => (
+                        <View key={user.id} style={styles.avatarItem}>
                             <Image
                                 style={styles.avatarImg}
                                 contentFit='contain'
-                                source={user.avatar}
+                                source={avatars[user.avatarIndex]}
                             />
+                            <Text style={styles.assigneeName}>{user.name}</Text>
                         </View>
                     ))}
                 </View>
+            )}
 
-                {/* Düzenle / Kaydet Butonu */}
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={isEditing ? handleSave : handleEditToggle}
-                >
-                    {isEditing ? <Ionicons name="checkmark-done" size={50} color="#22b947ff" /> : <MaterialCommunityIcons name="clipboard-edit-outline" size={50} color="#114495ff" />
-                    }
-                </TouchableOpacity>
-
-            </View>
+            {/* Düzenle / Kaydet Butonu */}
+            <TouchableOpacity
+                style={styles.button}
+                onPress={isEditing ? handleSave : handleEditToggle}
+            >
+                {isEditing ?
+                    <Ionicons name="checkmark-done" size={50} color="#22b947ff" /> :
+                    <MaterialCommunityIcons name="clipboard-edit-outline" size={50} color="#114495ff" />
+                }
+            </TouchableOpacity>
 
             {/* Snackbar */}
             <Snackbar
@@ -109,13 +194,10 @@ export default function TaskDetailModal() {
                 onDismiss={() => setSnackbarVisible(false)}
                 duration={2000}
                 style={styles.snackbar}
-                theme={{ colors: { onSurface: 'white' } }}
             >
                 <Text style={{ color: "#fff" }}>✅ Görev başarıyla güncellendi!</Text>
             </Snackbar>
-
         </View>
-
     );
 }
 
@@ -141,19 +223,11 @@ const styles = StyleSheet.create({
         fontSize: 17,
         color: '#000000ff',
     },
-    tabBarContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-    },
     avatarImg: {
         width: 50,
         height: 50,
         backgroundColor: '#eee',
         borderRadius: 20,
-        marginTop: 30,
-        margin: 10
     },
     detailCard: {
         alignItems: "flex-start",
@@ -161,7 +235,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 12,
         margin: 12,
-        width: 320,
+        width: '100%',
         height: 200,
         shadowColor: '#000',
         shadowOpacity: 0.1,
@@ -171,6 +245,11 @@ const styles = StyleSheet.create({
     avatarContainer: {
         flexDirection: "row",
         alignItems: "flex-start",
+        flexWrap: 'wrap',
+    },
+    avatarItem: {
+        alignItems: 'center',
+        margin: 10,
     },
     input: {
         backgroundColor: "#f0f0f0",
@@ -181,20 +260,34 @@ const styles = StyleSheet.create({
     snackbar: {
         backgroundColor: "#323232",
         borderRadius: 8,
-        left: 22
     },
     button: {
         marginTop: 30,
         borderRadius: 8,
         alignItems: "center",
-    },
-    avatarandbutton: {
-        flexDirection: "row",
-        justifyContent: "space-around"
+        alignSelf: 'center',
     },
     inputEditing: {
         borderColor: "#1d4ed8",
         backgroundColor: "#f3ededff",
     },
-
+    assigneesLabel: {
+        color: "#878787ff",
+        marginTop: 20,
+        marginBottom: 10,
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    assigneeName: {
+        fontSize: 12,
+        marginTop: 5,
+        textAlign: 'center',
+    },
+    dropdown: {
+        borderColor: '#e5e7eb',
+        marginBottom: 10,
+    },
+    dropdownContainer: {
+        borderColor: '#e5e7eb',
+    },
 });

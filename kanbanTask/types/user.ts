@@ -1,9 +1,11 @@
-import { ImageSourcePropType } from 'react-native';
 
 export interface User {
-    id: string;
+    id?: string;
     name: string;
-    surname?: string;
+    surname: string;
     email?: string;
-    avatar?: ImageSourcePropType;
-}
+    password: string;
+    avatarIndex: number;
+    created_at?: Date;
+    updated_at?: Date;
+} 

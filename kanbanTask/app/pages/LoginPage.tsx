@@ -2,15 +2,30 @@ import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, KeyboardAvo
 import React, { useState } from 'react';
 import GeneralBtn from '../components/GeneralBtn';
 import { useRouter } from 'expo-router';
+import { loginUser } from '@/store/slices/authSlice';
+import { useAppDispatch } from '../../store/hooks';
 
 export default function LoginPage() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const router = useRouter();
 
+    const dispatch = useAppDispatch()
+
     const routeHomePage = () => {
-        email == "test@gmail.com" && password === "123456" ? router.push("/pages/Home") : Alert.alert("Hata", "Email adresi veya şifre doğru giriniz.")
-    }
+        console.log("Dispatching loginUser with:", { email, password });
+        dispatch(loginUser({ email, password }))
+            .unwrap()
+            .then((res) => {
+                console.log("Login success:", res);
+                router.push("/pages/Home");
+            })
+            .catch((err) => {
+                console.log("Login error:", err);
+                Alert.alert("Hata", err);
+            });
+
+    };
 
     return (
         <KeyboardAvoidingView

@@ -1,18 +1,53 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
 import GeneralBtn from "../components/GeneralBtn";
 import { useRouter } from 'expo-router'
 import { avatars } from "../../types/avatarMap"
-
+import { useAppDispatch } from "@/store/hooks";
+import { addUserData } from "@/store/apiwithThunks/usersApi";
+import { User } from "@/types/user";
 
 export default function RegisterPage() {
     const [name, setName] = useState<string>("");
     const [surname, setSurname] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-    const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
+    const [selectedAvatar, setSelectedAvatar] = useState<number>(0);
     const router = useRouter();
 
+    const dispatch = useAppDispatch();
+
+
+    const newUser: User = {
+        name,
+        surname,
+        email,
+        password,
+        avatarIndex: selectedAvatar
+    }
+
+    const createAnAcoount = async () => {
+        if (!name || !surname || !email || !password) {
+            Alert.alert("Hata", "Lütfen tüm alanları doldurun.");
+            return;
+        }
+
+        try {
+            await dispatch(addUserData(newUser)).unwrap();
+            Alert.alert("Başarılı", "Kayıt işlemi tamamlandı!");
+            setName("");
+            setSurname("");
+            setEmail("");
+            setPassword("");
+            setSelectedAvatar(0);
+
+            router.push("/pages/LoginPage");
+        } catch (error) {
+            console.error("Kayıt hatası:", error);
+            Alert.alert("Hata", "Hesap oluştururken hata oluştu.");
+        }
+
+    }
 
 
     return (
@@ -70,7 +105,7 @@ export default function RegisterPage() {
             </View>
 
             <View style={styles.buttonContainer}>
-                <GeneralBtn color="#6661ebff" selfText="ÜYE OL" />
+                <GeneralBtn color="#6661ebff" selfText="ÜYE OL" onPress={createAnAcoount} />
                 <View style={styles.loginRow}>
                     <Text>Zaten bir hesabınız mı var?</Text>
                     <TouchableOpacity onPress={() => router.push("/pages/LoginPage")}>

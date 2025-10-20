@@ -38,7 +38,6 @@ export async function getTaskById(id) {
 }
 
 
-
 // Görev ekleme
 export async function addTask(task, createdById, assignees = []) {
     const newTask = {

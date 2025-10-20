@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -13,8 +13,11 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import GeneralBtn from "../components/GeneralBtn";
 import { Task } from "../../types/task";
 import { LogBox } from 'react-native';
-import { useAppDispatch } from "../../store/hooks";
-import { addTask } from "../../store/slices/tasksSlice";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { getUserData } from "../../store/apiwithThunks/usersApi";
+import { addTaskData } from "../../store/apiwithThunks/tasksApi";
+import { User } from '@/types/user';
+import { loadUserFromStorage } from "../../store/slices/authSlice"
 
 
 LogBox.ignoreLogs(['SafeAreaView has been deprecated']);
@@ -26,65 +29,84 @@ interface CreateTaskModalProps {
 
 export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
 
+
+    const dispatch = useAppDispatch();
+    const { user: currentUser, token } = useAppSelector(state => state.auth);
+    const { currentUser: usersList } = useAppSelector(state => state.user);
+
+
+    // kullanıcıdan alınan veriler ve sonrasında veritabanına atılacak veriler işte.
     const [title, setTitle] = useState<string>('');
     const [description, setDescription] = useState<string>('');
     const [valueStatus, setValueStatus] = useState<string | null>(null);
-
-    const [open, setOpen] = useState<boolean>(false);
-    const [assignee, setAssignee] = useState<string[]>([]);
-    const [items, setItems] = useState([
-        { label: 'Alice', value: 'alice' },
-        { label: 'Bob', value: 'bob' },
-    ]);
+    const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
 
     const [openStatus, setOpenStatus] = useState<boolean>(false);
     const [itemsStatus, setItemsStatus] = useState([
         { label: 'Todo', value: 'todo' },
         { label: 'Backlog', value: 'backlog' },
-        { label: 'Inprogress', value: 'inprogress' },
+        { label: 'Inprogress', value: 'Inprogress' },
     ]);
 
-    const dispatch = useAppDispatch();
+
+    const [open, setOpen] = useState<boolean>(false);
+    const [items, setItems] = useState<{ label: string; value: string }[]>([]);
+
+    useEffect(() => {
+        dispatch(loadUserFromStorage());
+    }, [dispatch]);
 
 
+    // Kullanıcıları getir
+    useEffect(() => {
+        dispatch(getUserData());
+    }, [dispatch]);
+
+    // Dropdown için items hazırla
+    useEffect(() => {
+        if (usersList) {
+            const dropdownItems = usersList.map((user: User) => ({
+                label: user.name,
+                value: user.id.toString()
+            }));
+            setItems(dropdownItems);
+        }
+    }, [usersList]);
 
 
     const handleCreateTask = () => {
-        if (!valueStatus) {
-            alert("Lütfen bir durum seçin!");
+        if (!title.trim() || !description.trim() || !valueStatus) {
+            alert("Lütfen tüm alanları doldurun!");
             return;
         }
 
-        if (!title.trim() || !description.trim()) {
-            alert("Lütfen başlık ve açıklama girin!");
+        if (!currentUser) {
+            alert("Kullanıcı bilgisi bulunamadı!");
             return;
         }
 
-        // Seçilen kullanıcıları assignee formatına çevir
-        const selectedAssignees = assignee.map((name, index) => ({
-            id: String(Date.now() + index),
-            name,
-            avatar: undefined
-        }));
-
-        const newTask: Task = {
-            id: String(Date.now()),
+        // Backend fonksiyonun beklediği şekilde sadece string id listesi gönderiyoruz
+        dispatch(addTaskData({
             title,
             description,
-            status: valueStatus,  // 👈 dikkat: valueStatus burada kullanılıyor
-            assignee: selectedAssignees,
-        };
-
-        // Redux slice'a ekle
-        dispatch(addTask(newTask));
-
-        // Inputları sıfırla
-        setTitle('');
-        setDescription('');
-        setAssignee([]);
-        setValueStatus(null);
-        alert("Görev başarıyla eklendi!");
+            status: valueStatus,
+            assignees: assigneeIds as any, // string[] id listesi
+            created_by: currentUser.id
+        }))
+            .unwrap()
+            .then(() => {
+                alert("Görev başarıyla eklendi!");
+                setTitle('');
+                setDescription('');
+                setValueStatus(null);
+                setAssigneeIds([]);
+            })
+            .catch(err => {
+                alert("Görev eklenemedi: " + err);
+            });
     };
+
+
 
 
     return (
@@ -137,10 +159,10 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
                             min={0}
                             max={5}
                             open={open}
-                            value={assignee}
+                            value={assigneeIds}
                             items={items}
                             setOpen={setOpen}
-                            setValue={setAssignee}
+                            setValue={setAssigneeIds}
                             setItems={setItems}
                             placeholder="İsim seçin"
                             style={styles.dropdown}

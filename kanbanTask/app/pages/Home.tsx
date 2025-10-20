@@ -52,7 +52,7 @@ export default function Home() {
                     <KanbanRow
                         title="Inprogress"
                         color="green"
-                        status="inProgress"
+                        status="Inprogress"
                     />
 
 

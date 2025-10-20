@@ -66,6 +66,10 @@ router.post(
             .withMessage("Şifre zorunludur.")
             .isLength({ min: 6 })
             .withMessage("Şifre en az 6 karakter olmalıdır."),
+        body("avatarIndex")
+            .trim()
+            .notEmpty()
+            .withMessage("Avatar seçmek zorunludur."),
     ],
     async (req, res, next) => {
         const errors = validationResult(req);

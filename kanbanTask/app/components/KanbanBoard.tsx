@@ -1,9 +1,13 @@
 import { View, Text, TouchableOpacity, FlatList } from 'react-native'
-import React, { use } from 'react'
+import React, { use, useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { useAppSelector } from "../../store/hooks"
+import { useAppDispatch, useAppSelector } from "../../store/hooks"
+import { getTaskData } from '@/store/apiwithThunks/tasksApi';
+import { getUserData } from '@/store/apiwithThunks/usersApi';
+import { avatars } from "@/types/avatarMap"
+import { User } from '@/types/user';
 
 
 // Props interface'ini tanımla
@@ -18,9 +22,56 @@ interface KanbanColumnProps {
 
 export default function KanbanBoard({ title, color, status }: KanbanColumnProps) {
 
-    const { tasks } = useAppSelector((state) => state.tasks);
-    const filteredTasks = tasks.filter((t) => t.status === status);
+    const dispatch = useAppDispatch();
 
+    const { tasks, statusTask, errorTask } = useAppSelector((state) => state.tasks);
+    const { currentUser, statusUser, errorUser } = useAppSelector((state) => state.user);
+
+    useEffect(() => {
+        // Eğer veriler daha önce yüklenmediyse çek
+        if (tasks.length === 0 && statusTask === 'idle') {
+            dispatch(getTaskData());
+        }
+    }, [dispatch, tasks.length, statusTask]);
+
+    useEffect(() => {
+        // Eğer veriler daha önce yüklenmediyse çek
+        if (currentUser.length === 0 && statusUser === 'idle') {
+            dispatch(getUserData());
+        }
+    }, [dispatch, currentUser.length, statusUser]);
+
+    console.log("veriler ", tasks)
+    console.log("users from state:", currentUser);
+
+    // Filtrele
+    const filteredTasks = tasks?.filter((t) => t.status === status) || [];
+
+    // Kullanıcı bilgilerini eşleştiren fonksiyon
+    const getAssigneeInfo = (assigneeIds: string[]): User[] => {
+        if (!currentUser || !assigneeIds || assigneeIds.length === 0) return [];
+
+        return assigneeIds
+            .map(id => {
+                const user = currentUser.find(u => u.id === id);
+                return user ? {
+                    id: user.id,
+                    name: user.name,
+                    avatarIndex: user.avatarIndex
+                } : undefined;
+            })
+            .filter((user): user is User & { id: string } => user !== undefined);
+    };
+
+    // Eğer yükleniyorsa göster
+    if (statusTask === 'loading' || statusUser === 'loading') {
+        return <Text style={styles.loadingText}>Yükleniyor...</Text>;
+    }
+
+    // Eğer hata varsa göster
+    if (errorTask || errorUser) {
+        return <Text style={styles.errorText}>Hata: {errorTask || errorUser}</Text>;
+    }
     return (
         <View>
             <View style={styles.columnHeader}>
@@ -35,27 +86,43 @@ export default function KanbanBoard({ title, color, status }: KanbanColumnProps)
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.taskList}
-                renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.taskCard} onPress={() => router.push({
-                        pathname: '/modal/task-detail',
-                        params: { task: JSON.stringify(item) }
-                    })}>
-                        <Text style={styles.taskTitle}>{item.title}</Text>
-                        <Text style={styles.taskDescription}>{item.description}</Text>
-                        <View style={styles.userInfo}>
-                            {item.assignee.map((user) => (
-                                <View key={user.id} style={{ marginRight: 8 }}>
-                                    <Image
-                                        style={styles.avatarImg}
-                                        contentFit='contain'
-                                        source={user.avatar}>
-                                    </Image>
-                                    <Text style={{ fontSize: 15 }}>{user.name}</Text>
-                                </View>
-                            ))}
-                        </View>
-                    </TouchableOpacity>
-                )}
+                renderItem={({ item }) => {
+                    // assignees'leri işle - hem string ID array hem de object array durumunu kontrol et
+                    const assigneeIds = Array.isArray(item.assignees)
+                        ? item.assignees.map(a => typeof a === 'string' ? a : a.id).filter((id): id is string => id !== undefined) // undefined'ları filtrele
+                        : [];
+
+                    const assigneeInfos = getAssigneeInfo(assigneeIds);
+
+                    return (
+                        <TouchableOpacity
+                            style={styles.taskCard}
+                            onPress={() => router.push({
+                                pathname: '/modal/task-detail',
+                                params: { task: JSON.stringify(item) }
+                            })}
+                        >
+                            <Text style={styles.taskTitle}>{item.title}</Text>
+                            <Text style={styles.taskDescription} numberOfLines={2}>
+                                {item.description}
+                            </Text>
+                            <View style={styles.userInfo}>
+                                {assigneeInfos.length > 0 ? (
+                                    assigneeInfos.map((user) => (
+                                        <View key={user.id} >
+                                            <Image
+                                                style={styles.avatarImg}
+                                                source={avatars[user.avatarIndex]}
+                                            />
+                                        </View>
+                                    ))
+                                ) : (
+                                    <Text >Atanmış kullanıcı yok</Text>
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    );
+                }}
             />
 
             {(!filteredTasks || filteredTasks.length === 0) && (
@@ -129,5 +196,15 @@ const styles = StyleSheet.create({
         height: 30,
         backgroundColor: '#eee',
         borderRadius: 20,
-    }
+    },
+    loadingText: {
+        padding: 15,
+        textAlign: 'center',
+        color: '#888',
+    },
+    errorText: {
+        padding: 15,
+        textAlign: 'center',
+        color: 'red',
+    },
 })
