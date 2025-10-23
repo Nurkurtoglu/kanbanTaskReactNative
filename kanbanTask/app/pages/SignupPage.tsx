@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router'
 import { avatars } from "../../types/avatarMap"
 import { useAppDispatch } from "@/store/hooks";
 import { addUserData } from "@/store/apiwithThunks/usersApi";
-import { User } from "@/types/user";
+
 
 export default function RegisterPage() {
     const [name, setName] = useState<string>("");
@@ -18,7 +18,7 @@ export default function RegisterPage() {
     const dispatch = useAppDispatch();
 
 
-    const newUser: User = {
+    const newUser = {
         name,
         surname,
         email,
@@ -41,14 +41,13 @@ export default function RegisterPage() {
             setPassword("");
             setSelectedAvatar(0);
 
-            router.push("/pages/LoginPage");
+            router.push("/pages/LoginPage" as any);
         } catch (error) {
             console.error("Kayıt hatası:", error);
             Alert.alert("Hata", "Hesap oluştururken hata oluştu.");
         }
 
     }
-
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
@@ -108,7 +107,7 @@ export default function RegisterPage() {
                 <GeneralBtn color="#6661ebff" selfText="ÜYE OL" onPress={createAnAcoount} />
                 <View style={styles.loginRow}>
                     <Text>Zaten bir hesabınız mı var?</Text>
-                    <TouchableOpacity onPress={() => router.push("/pages/LoginPage")}>
+                    <TouchableOpacity onPress={() => router.push("/pages/LoginPage" as any)}>
                         <Text style={{ color: "#6661ebff", marginHorizontal: 5 }}>Giriş</Text>
                     </TouchableOpacity>
                 </View>

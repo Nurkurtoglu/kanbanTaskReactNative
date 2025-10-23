@@ -98,7 +98,7 @@ export default function KanbanBoard({ title, color, status }: KanbanColumnProps)
                         <TouchableOpacity
                             style={styles.taskCard}
                             onPress={() => router.push({
-                                pathname: '/modal/task-detail',
+                                pathname: '/modal/task-detail' as any,
                                 params: { task: JSON.stringify(item) }
                             })}
                         >

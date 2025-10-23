@@ -18,7 +18,7 @@ export default function LoginPage() {
             .unwrap()
             .then((res) => {
                 console.log("Login success:", res);
-                router.push("/pages/Home");
+                router.push("/pages/Home" as any);
             })
             .catch((err) => {
                 console.log("Login error:", err);
@@ -66,7 +66,7 @@ export default function LoginPage() {
                     <GeneralBtn color="#6661ebff" selfText="Giriş" onPress={routeHomePage} />
                     <View style={styles.registerContainer}>
                         <Text>Hesabınız yok mu?</Text>
-                        <TouchableOpacity onPress={() => router.push('/pages/SignupPage')}>
+                        <TouchableOpacity onPress={() => router.push('/pages/SignupPage' as any)}>
                             <Text style={styles.registerText}>Kayıt olun</Text>
                         </TouchableOpacity>
                     </View>
@@ -131,5 +131,6 @@ const styles = StyleSheet.create({
     registerText: {
         color: '#6661ebff',
         fontWeight: '600',
+        marginHorizontal: 5
     },
 });

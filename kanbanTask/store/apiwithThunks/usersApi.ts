@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_URL } from '@env';
+import { API_URL } from "@/contants/Common";
 import { User } from "../../types/user"
 import { createAsyncThunk } from '@reduxjs/toolkit';
 

@@ -13,14 +13,16 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { User } from '@/types/user';
 import { updateTaskData } from '@/store/apiwithThunks/tasksApi';
 
+
 export default function TaskDetailModal() {
     const router = useRouter();
     const { task } = useLocalSearchParams();
 
     const { currentUser: usersList } = useAppSelector((state) => state.user);
-    const dispatch = useAppDispatch();
-
+    const { tasks } = useAppSelector((state) => state.tasks); // store’dan tüm task’lar
+    const { user: authUser } = useAppSelector((state) => state.auth);
     const taskData: Task = task ? JSON.parse(task as string) : null
+    const dispatch = useAppDispatch();
 
     const [editableTask, setEditableTask] = useState<Task | null>(taskData);
     const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -31,40 +33,52 @@ export default function TaskDetailModal() {
     const [assigneeItems, setAssigneeItems] = useState<{ label: string, value: string }[]>([]);
     const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
 
-    // Dropdown items'ı hazırla
     useEffect(() => {
-        if (usersList) {
-            const items = usersList
-                .filter((user: User) => user.id) // id'si olmayanları filtrele
-                .map((user: User) => ({
-                    label: `${user.name} ${user.surname}`,
-                    value: user.id! // Non-null assertion (!) kullan
-                }));
-            setAssigneeItems(items);
-        }
-    }, [usersList]);
+        if (!usersList) return;
+        // authUser varsa kendisini hariç tut
+        const items = usersList
+            .filter((user: User) => authUser ? user.id !== authUser.id : true)
+            .map((user: User) => ({
+                label: `${user.name} ${user.surname}`,
+                value: user.id!
+            }));
+
+        setAssigneeItems(items);
+    }, [usersList, authUser]);
 
     useEffect(() => {
         if (isEditing && editableTask?.assignees) {
             const assigneeIds = editableTask.assignees
                 .map(user => user.id)
-                .filter((id): id is string => id !== undefined); // undefined'ları filtrele
             setSelectedAssignees(assigneeIds);
         }
     }, [isEditing, editableTask]);
 
     const handleEditToggle = () => {
+
+        if (!authUser || authUser.id !== reporterId) {
+            alert("Bu görevi yalnızca oluşturan kişi düzenleyebilir!");
+            return;
+        }
+
         if (!isEditing) {
             // Edit moda geçiyoruz
             setIsEditing(true);
         } else {
             // Edit moddan çıkıyoruz, değişiklikleri kaydetmeden
             setIsEditing(false);
-            setEditableTask(taskData); // Orijinal veriye dön
+            // setEditableTask(taskData); // Orijinal veriye dön
+            // Düzenlemeyi iptal edince editableTask'i Redux store’dan güncel task ile set et
+            const latestTask = tasks.find(t => t.id === taskData?.id);
+            if (latestTask) setEditableTask(latestTask);
         }
     };
 
     const handleSave = () => {
+        if (!authUser || authUser.id !== reporterId) {
+            alert("Bu görevi güncelleme yetkiniz yok!");
+            return;
+        }
 
         if (!editableTask?.id) {
             alert("Task ID bulunamadı!");
@@ -73,10 +87,8 @@ export default function TaskDetailModal() {
 
         // Seçilen assignee'leri User objelerine çevir
         const updatedAssignees = usersList
-            .filter(user => user.id && selectedAssignees.includes(user.id)) // user.id kontrolü ekle
-            .map(user => user.id!) // Non-null assertion
-            .filter(Boolean); // Güvence için
-
+            .filter(user => selectedAssignees.includes(user.id!))
+            .map(user => user.id!)
 
         const updatedTask = {
             ...editableTask,
@@ -86,9 +98,14 @@ export default function TaskDetailModal() {
         // Redux action'ını dispatch et
         dispatch(updateTaskData(updatedTask))
             .unwrap()
-            .then(() => {
+            .then((updated) => {
                 setSnackbarVisible(true);
                 console.log("Görev güncellendi");
+
+                // Kaydetmeden sonra eski haline dön
+                setIsEditing(false);
+                // Kaydettikten sonra editableTask’i Redux store’daki güncel task ile güncelle
+                setEditableTask(updated);
             })
             .catch(err => {
                 alert("Güncelleme hatası: " + err);
@@ -289,5 +306,6 @@ const styles = StyleSheet.create({
     },
     dropdownContainer: {
         borderColor: '#e5e7eb',
+        maxHeight: 200,
     },
 });

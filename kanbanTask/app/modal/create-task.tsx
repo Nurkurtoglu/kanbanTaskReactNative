@@ -67,7 +67,7 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
         if (usersList) {
             const dropdownItems = usersList.map((user: User) => ({
                 label: user.name,
-                value: user.id.toString()
+                value: user.id
             }));
             setItems(dropdownItems);
         }
@@ -169,7 +169,6 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
                             dropDownContainerStyle={styles.dropdownContainer}
                             listMode="SCROLLVIEW"
                         />
-
                         <GeneralBtn handleCreateTask={handleCreateTask} color="red" selfText="Kaydet" />
 
                     </ScrollView>
@@ -246,6 +245,6 @@ const styles = StyleSheet.create({
         borderColor: '#ccc',
         borderWidth: 1,
         marginBottom: 20,
-
+        height: 150
     },
 });

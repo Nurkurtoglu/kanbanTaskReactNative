@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from "../../types/user"
 import axios from 'axios';
-import { API_URL } from '@env';
+import { API_URL } from "@/contants/Common";
 
 
 interface AuthState {
