@@ -1,5 +1,5 @@
 // app/modal/task-detail.tsx
-import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Task } from "../../types/task";
@@ -19,7 +19,7 @@ export default function TaskDetailModal() {
     const { task } = useLocalSearchParams();
 
     const { currentUser: usersList } = useAppSelector((state) => state.user);
-    const { tasks } = useAppSelector((state) => state.tasks); // store’dan tüm task’lar
+    const { tasks } = useAppSelector((state) => state.tasks);
     const { user: authUser } = useAppSelector((state) => state.auth);
     const taskData: Task = task ? JSON.parse(task as string) : null
     const dispatch = useAppDispatch();
@@ -32,6 +32,8 @@ export default function TaskDetailModal() {
     const [openAssignee, setOpenAssignee] = useState(false);
     const [assigneeItems, setAssigneeItems] = useState<{ label: string, value: string }[]>([]);
     const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
+    const reporterId = taskData?.created_by;
+    const reporter = usersList?.find(user => user.id === reporterId);
 
     useEffect(() => {
         if (!usersList) return;
@@ -57,7 +59,7 @@ export default function TaskDetailModal() {
     const handleEditToggle = () => {
 
         if (!authUser || authUser.id !== reporterId) {
-            alert("Bu görevi yalnızca oluşturan kişi düzenleyebilir!");
+            Alert.alert("Uyarı!", "Bu görevi yalnızca oluşturan kişi düzenleyebilir!");
             return;
         }
 
@@ -67,7 +69,6 @@ export default function TaskDetailModal() {
         } else {
             // Edit moddan çıkıyoruz, değişiklikleri kaydetmeden
             setIsEditing(false);
-            // setEditableTask(taskData); // Orijinal veriye dön
             // Düzenlemeyi iptal edince editableTask'i Redux store’dan güncel task ile set et
             const latestTask = tasks.find(t => t.id === taskData?.id);
             if (latestTask) setEditableTask(latestTask);
@@ -76,12 +77,12 @@ export default function TaskDetailModal() {
 
     const handleSave = () => {
         if (!authUser || authUser.id !== reporterId) {
-            alert("Bu görevi güncelleme yetkiniz yok!");
+            Alert.alert("Uyarı", "Bu görevi güncelleme yetkiniz yok!");
             return;
         }
 
         if (!editableTask?.id) {
-            alert("Task ID bulunamadı!");
+            Alert.alert("Hata", "Task ID bulunamadı!");
             return;
         }
 
@@ -108,12 +109,11 @@ export default function TaskDetailModal() {
                 setEditableTask(updated);
             })
             .catch(err => {
-                alert("Güncelleme hatası: " + err);
+                Alert.alert("Hata", "Güncelleme hatası: " + err);
             });
     };
 
-    const reporterId = taskData?.created_by;
-    const reporter = usersList?.find(user => user.id === reporterId);
+
 
     return (
         <View style={styles.container}>
@@ -139,8 +139,18 @@ export default function TaskDetailModal() {
             )}
 
             {/* Raporlayan */}
-            <Text>Raporlayan: {reporter?.name} {reporter?.surname}</Text>
 
+            <View style={styles.reporterContainer}>
+                {reporter && reporter.avatarIndex != null && (
+                    <Image
+                        style={styles.reporterAvatarImg}
+                        contentFit='contain'
+                        source={avatars[reporter?.avatarIndex]}
+                    />
+                )}
+                <Text style={{ color: "#878787ff" }}>Raporlayan: </Text>
+                <Text style={{ color: "#000000ff" }}>{reporter?.name} {reporter?.surname}</Text>
+            </View>
 
             <Text style={{ color: "#878787ff", marginTop: 40 }}>Açıklama:</Text>
 
@@ -191,29 +201,35 @@ export default function TaskDetailModal() {
                             <Text style={styles.assigneeName}>{user.name}</Text>
                         </View>
                     ))}
+
                 </View>
             )}
 
-            {/* Düzenle / Kaydet Butonu */}
-            <TouchableOpacity
-                style={styles.button}
-                onPress={isEditing ? handleSave : handleEditToggle}
-            >
-                {isEditing ?
-                    <Ionicons name="checkmark-done" size={50} color="#22b947ff" /> :
-                    <MaterialCommunityIcons name="clipboard-edit-outline" size={50} color="#114495ff" />
-                }
-            </TouchableOpacity>
+            <View style={styles.editingStyle}>
+                {/* Düzenle / Kaydet Butonu */}
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={isEditing ? handleSave : handleEditToggle}
+                >
+                    {isEditing ?
+                        <Ionicons name="checkmark-done" size={50} color="#22b947ff" /> :
+                        <MaterialCommunityIcons name="clipboard-edit-outline" size={50} color="#114495ff" />
+                    }
+                </TouchableOpacity>
+            </View>
 
-            {/* Snackbar */}
-            <Snackbar
-                visible={snackbarVisible}
-                onDismiss={() => setSnackbarVisible(false)}
-                duration={2000}
-                style={styles.snackbar}
-            >
-                <Text style={{ color: "#fff" }}>✅ Görev başarıyla güncellendi!</Text>
-            </Snackbar>
+
+            <View style={{ alignItems: "center" }}>
+                {/* Snackbar */}
+                <Snackbar
+                    visible={snackbarVisible}
+                    onDismiss={() => setSnackbarVisible(false)}
+                    duration={2000}
+                    style={styles.snackbar}
+                >
+                    <Text style={{ color: "#fff" }}>✅ Görev başarıyla güncellendi!</Text>
+                </Snackbar>
+            </View>
         </View>
     );
 }
@@ -251,17 +267,18 @@ const styles = StyleSheet.create({
         backgroundColor: '#e1dedeff',
         borderRadius: 10,
         padding: 12,
-        margin: 12,
         width: '100%',
         height: 200,
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 4,
         borderColor: '#e5e7eb',
+        marginTop: 5
     },
     avatarContainer: {
         flexDirection: "row",
-        alignItems: "flex-start",
+        alignItems: "center",
+        justifyContent: "flex-start",
         flexWrap: 'wrap',
     },
     avatarItem: {
@@ -275,8 +292,9 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     snackbar: {
-        backgroundColor: "#323232",
+        backgroundColor: "#5A56E9",
         borderRadius: 8,
+        marginLeft: 5
     },
     button: {
         marginTop: 30,
@@ -308,4 +326,20 @@ const styles = StyleSheet.create({
         borderColor: '#e5e7eb',
         maxHeight: 200,
     },
+    editingStyle: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+    },
+    reporterContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "flex-start",
+    },
+    reporterAvatarImg: {
+        width: 40,
+        height: 40,
+        backgroundColor: '#eee',
+        borderRadius: 20,
+        margin: 10
+    }
 });

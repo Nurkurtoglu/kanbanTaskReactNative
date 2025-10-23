@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
-import GeneralBtn from "../components/GeneralBtn";
+import GeneralBtn from "../../components/GeneralBtn";
 import { useRouter } from 'expo-router'
 import { avatars } from "../../types/avatarMap"
 import { useAppDispatch } from "@/store/hooks";

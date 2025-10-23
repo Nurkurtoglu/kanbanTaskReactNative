@@ -8,6 +8,7 @@ export default function PagesLayout() {
                 <Stack.Screen name="LoginPage" />
                 <Stack.Screen name="SignupPage" />
                 <Stack.Screen name="Home" />
+                <Stack.Screen name="SettingsPage" />
             </Stack>
         </PaperProvider>
 

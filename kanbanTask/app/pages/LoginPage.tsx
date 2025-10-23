@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, ScrollView, Platform, Alert } from 'react-native';
 import React, { useState } from 'react';
-import GeneralBtn from '../components/GeneralBtn';
+import GeneralBtn from '../../components/GeneralBtn';
 import { useRouter } from 'expo-router';
 import { loginUser } from '@/store/slices/authSlice';
 import { useAppDispatch } from '../../store/hooks';
+
 
 export default function LoginPage() {
     const [email, setEmail] = useState<string>('');
@@ -18,7 +19,9 @@ export default function LoginPage() {
             .unwrap()
             .then((res) => {
                 console.log("Login success:", res);
-                router.push("/pages/Home" as any);
+                setEmail("")
+                setPassword("")
+                router.push("/pages/Home");
             })
             .catch((err) => {
                 console.log("Login error:", err);

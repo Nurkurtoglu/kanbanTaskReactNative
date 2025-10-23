@@ -6,11 +6,12 @@ import {
     StyleSheet,
     ScrollView,
     Modal,
-    TextInput
+    TextInput,
+    Alert
 } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import DropDownPicker from 'react-native-dropdown-picker';
-import GeneralBtn from "../components/GeneralBtn";
+import GeneralBtn from "../../components/GeneralBtn";
 import { Task } from "../../types/task";
 import { LogBox } from 'react-native';
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -33,6 +34,7 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
     const dispatch = useAppDispatch();
     const { user: currentUser, token } = useAppSelector(state => state.auth);
     const { currentUser: usersList } = useAppSelector(state => state.user);
+
 
 
     // kullanıcıdan alınan veriler ve sonrasında veritabanına atılacak veriler işte.
@@ -65,10 +67,12 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
     // Dropdown için items hazırla
     useEffect(() => {
         if (usersList) {
-            const dropdownItems = usersList.map((user: User) => ({
-                label: user.name,
-                value: user.id
-            }));
+            const dropdownItems = usersList
+                .filter((user: User) => currentUser ? user.id !== currentUser.id : true)
+                .map((user: User) => ({
+                    label: user.name,
+                    value: user.id
+                }));
             setItems(dropdownItems);
         }
     }, [usersList]);
@@ -76,12 +80,12 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
 
     const handleCreateTask = () => {
         if (!title.trim() || !description.trim() || !valueStatus) {
-            alert("Lütfen tüm alanları doldurun!");
+            Alert.alert("Hata", "Lütfen tüm alanları doldurun!");
             return;
         }
 
         if (!currentUser) {
-            alert("Kullanıcı bilgisi bulunamadı!");
+            Alert.alert("Hata", "Kullanıcı bilgisi bulunamadı!");
             return;
         }
 
@@ -95,18 +99,16 @@ export default function CreateTaskModal({ handleClose }: CreateTaskModalProps) {
         }))
             .unwrap()
             .then(() => {
-                alert("Görev başarıyla eklendi!");
+                Alert.alert("Bilgi", "Görev başarıyla eklendi!");
                 setTitle('');
                 setDescription('');
                 setValueStatus(null);
                 setAssigneeIds([]);
             })
             .catch(err => {
-                alert("Görev eklenemedi: " + err);
+                Alert.alert("Hata", "Görev eklenemedi: " + err);
             });
     };
-
-
 
 
     return (

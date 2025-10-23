@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from "../../types/user"
 import axios from 'axios';
 import { API_URL } from "@/contants/Common";
+import { updateUserData } from "../apiwithThunks/usersApi";
 
 
 interface AuthState {
@@ -90,6 +91,14 @@ const authSlice = createSlice({
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;
                 state.token = null;
+            })
+            .addCase(updateUserData.fulfilled, (state, action) => {
+                // Eğer giriş yapan kullanıcı güncellendiyse auth.user'ı da güncelle
+                if (state.user && state.user.id === action.payload.id) {
+                    state.user = action.payload;
+                    // AsyncStorage'daki user bilgisini de güncelle
+                    AsyncStorage.setItem('user', JSON.stringify(action.payload));
+                }
             });
     },
 });

@@ -1,22 +1,46 @@
 import {
     View, StyleSheet, ScrollView,
-    TouchableOpacity,
+    TouchableOpacity, TextInput
 } from 'react-native'
 import React from 'react'
-import KanbanRow from '../components/KanbanBoard';
-import TabBar from '../components/BottomBar';
+import KanbanRow from '../../components/KanbanBoard';
+import TabBar from '../../components/BottomBar';
 import CreateTaskModal from '../modal/create-task';
 import { Ionicons } from '@expo/vector-icons';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Image } from 'expo-image';
 import { useState } from "react"
+import { useRouter } from 'expo-router';
+import { useAppSelector } from '@/store/hooks';
 
 
 
 export default function Home() {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [isSearching, setIsSearching] = useState(false); // search input toggle
+    const { tasks } = useAppSelector(state => state.tasks);
+
+    const filteredTasks = tasks.filter(task =>
+    (task.title.toLowerCase().includes(searchText.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchText.toLowerCase()))
+    );
+
+
+    // Search ikonuna tıklayınca arama inputu aç
+    const handleSearchPress = () => {
+        setIsSearching(prev => !prev);
+    }
+
+
+    const router = useRouter()
+
+    const routerSettingsPage = () => {
+        console.log("Settings sayfası")
+        router.push("/pages/SettingsPage")
+    }
 
     return (
         <View style={{ flex: 1 }}>
@@ -25,14 +49,24 @@ export default function Home() {
                 <View style={styles.header}>
                     <Image style={styles.img} contentFit='contain' source={require("../../assets/images/rastMobile.png")} />
                     <View style={styles.iconsContainer}>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleSearchPress}>
                             <Ionicons name="search" size={24} color="white" />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={routerSettingsPage}>
                             <Feather name="settings" size={24} color="white" />
                         </TouchableOpacity>
                     </View>
                 </View>
+
+                {/* Arama inputu */}
+                {isSearching && (
+                    <TextInput
+                        style={{ padding: 10, backgroundColor: '#fff', margin: 10, borderRadius: 6 }}
+                        placeholder="Görev ara..."
+                        value={searchText}
+                        onChangeText={setSearchText}
+                    />
+                )}
 
                 {/* Kanban Board */}
                 <ScrollView style={styles.board}>
@@ -41,18 +75,21 @@ export default function Home() {
                         title="Backlog"
                         color="red"
                         status="backlog"
+                        taskss={filteredTasks}
                     />
 
                     <KanbanRow
                         title="Todo"
                         color="#8581ecff"
                         status="todo"
+                        taskss={filteredTasks}
                     />
 
                     <KanbanRow
                         title="Inprogress"
                         color="green"
                         status="Inprogress"
+                        taskss={filteredTasks}
                     />
 
 
@@ -92,7 +129,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: 15,
+        paddingHorizontal: 15,
+        paddingVertical: 20,
         backgroundColor: '#5A56E9',
         borderBottomColor: '#e0e0e0',
 

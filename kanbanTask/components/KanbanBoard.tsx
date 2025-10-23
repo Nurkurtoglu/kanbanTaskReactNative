@@ -3,11 +3,12 @@ import React, { use, useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { useAppDispatch, useAppSelector } from "../../store/hooks"
+import { useAppDispatch, useAppSelector } from "../store/hooks"
 import { getTaskData } from '@/store/apiwithThunks/tasksApi';
 import { getUserData } from '@/store/apiwithThunks/usersApi';
 import { avatars } from "@/types/avatarMap"
 import { User } from '@/types/user';
+import { Task } from '@/types/task';
 
 
 // Props interface'ini tanımla
@@ -15,12 +16,13 @@ interface KanbanColumnProps {
     title: string;
     color?: string;
     status: string;
+    taskss: Task[];
     onTaskPress?: (taskId: string) => void;
     onColumnPress?: () => void;
 }
 
 
-export default function KanbanBoard({ title, color, status }: KanbanColumnProps) {
+export default function KanbanBoard({ title, color, status, taskss }: KanbanColumnProps) {
 
     const dispatch = useAppDispatch();
 
@@ -41,11 +43,13 @@ export default function KanbanBoard({ title, color, status }: KanbanColumnProps)
         }
     }, [dispatch, currentUser.length, statusUser]);
 
+
+
     console.log("veriler ", tasks)
     console.log("users from state:", currentUser);
 
     // Filtrele
-    const filteredTasks = tasks?.filter((t) => t.status === status) || [];
+    const filteredTasks = taskss?.filter((t) => t.status === status) || [];
 
     // Kullanıcı bilgilerini eşleştiren fonksiyon
     const getAssigneeInfo = (assigneeIds: string[]): User[] => {
