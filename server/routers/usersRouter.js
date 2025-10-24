@@ -89,6 +89,10 @@ router.post(
             return res.status(201).json(result);
         } catch (err) {
             console.error("Kullanıcı eklenirken hata oluştu:", err);
+            if (err.code === "23505" && err.constraint === "users_email_unique") {
+                // Email zaten var
+                return res.status(400).json({ message: "Bu email zaten kayıtlı!" });
+            }
             next(err);
         }
     }

@@ -1,117 +1,145 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { Formik } from "formik";
+import * as yup from "yup";
 import GeneralBtn from "../../components/GeneralBtn";
-import { useRouter } from 'expo-router'
-import { avatars } from "../../types/avatarMap"
-import { useAppDispatch } from "@/store/hooks";
+import { avatars } from "../../types/avatarMap";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addUserData } from "@/store/apiwithThunks/usersApi";
+import axios, { AxiosError } from "axios";
 
+
+import { LogBox } from "react-native";
+
+// Tüm uyarıları ve logları bastırmak
+LogBox.ignoreAllLogs(true);
+
+// Sadece belirli bir uyarıyı bastırmak
+LogBox.ignoreLogs([
+    "AxiosError" // Bu kısmı hatanın mesajından veya regex ile ayarlayabilirsin
+]);
+// Yup şeması
+const registerSchema = yup.object({
+    name: yup.string().required("İsim zorunludur"),
+    surname: yup.string().required("Soyisim zorunludur"),
+    email: yup.string().email("Geçerli bir email giriniz").required("Email zorunludur"),
+    password: yup.string().min(6, "Şifre en az 6 karakter olmalı").required("Şifre zorunludur"),
+    avatarIndex: yup.number().required("Avatar seçimi zorunludur"),
+});
+
+// Tip çıkarımı
+type RegisterFormValues = yup.InferType<typeof registerSchema>;
 
 export default function RegisterPage() {
-    const [name, setName] = useState<string>("");
-    const [surname, setSurname] = useState<string>("");
-    const [email, setEmail] = useState<string>("");
-    const [password, setPassword] = useState<string>("");
-    const [selectedAvatar, setSelectedAvatar] = useState<number>(0);
     const router = useRouter();
-
     const dispatch = useAppDispatch();
 
+    const initialValues: RegisterFormValues = {
+        name: "",
+        surname: "",
+        email: "",
+        password: "",
+        avatarIndex: 0,
+    };
+    const { currentUser, statusUser, errorUser } = useAppSelector((state) => state.user);
+    const userEmails = currentUser.map(user => user.email);
 
-    const newUser = {
-        name,
-        surname,
-        email,
-        password,
-        avatarIndex: selectedAvatar
-    }
-
-    const createAnAcoount = async () => {
-        if (!name || !surname || !email || !password) {
-            Alert.alert("Hata", "Lütfen tüm alanları doldurun.");
-            return;
-        }
-
+    const handleRegister = async (values: RegisterFormValues) => {
         try {
-            await dispatch(addUserData(newUser)).unwrap();
-            Alert.alert("Başarılı", "Kayıt işlemi tamamlandı!");
-            setName("");
-            setSurname("");
-            setEmail("");
-            setPassword("");
-            setSelectedAvatar(0);
-
+            await dispatch(addUserData(values)).unwrap();
+            Alert.alert("Başarılı", "Kayıt tamamlandı!");
             router.push("/pages/LoginPage" as any);
-        } catch (error) {
-            console.error("Kayıt hatası:", error);
-            Alert.alert("Hata", "Hesap oluştururken hata oluştu.");
+        } catch (error: any) {
+            let errorMessage = "Bu email zaten kayıtlı!";
+
+            // Axios hatası mı kontrol et
+            if (axios.isAxiosError(error)) {
+                // Backend'den gelen özel mesaj
+                errorMessage = error.response?.data?.message || errorMessage;
+            }
+
+            // Kullanıcıya göster
+            Alert.alert("Uyarı", errorMessage);
+            //console.log("Kayıt hatası:", error);
         }
-
-    }
-
+    };
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.header}>
                 <Image style={styles.img} source={require("../../assets/images/signup.png")} />
             </View>
 
-            <View style={styles.formContainer}>
-                <TextInput
-                    style={styles.input}
-                    value={name}
-                    onChangeText={setName}
-                    placeholder="İsim"
-                    placeholderTextColor="#666"
-                />
-                <TextInput
-                    style={styles.input}
-                    value={surname}
-                    onChangeText={setSurname}
-                    placeholder="Soyisim"
-                    placeholderTextColor="#666"
-                />
-                <TextInput
-                    style={styles.input}
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="Email"
-                    keyboardType="email-address"
-                    placeholderTextColor="#666"
-                />
-                <TextInput
-                    style={styles.input}
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="Şifre"
-                    placeholderTextColor="#666"
-                    secureTextEntry
-                />
+            <Formik initialValues={initialValues} validationSchema={registerSchema} onSubmit={handleRegister}>
+                {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue, setFieldError }) => (
+                    <View style={styles.formContainer}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="İsim"
+                            placeholderTextColor="#666"
+                            value={values.name}
+                            onChangeText={handleChange("name")}
+                            onBlur={handleBlur("name")}
+                        />
+                        {touched.name && errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-                <Text style={styles.avatarLabel}>Avatarını seç</Text>
-                <View style={styles.avatarContainer}>
-                    {avatars.map((avatar, index) => (
-                        <TouchableOpacity key={index} onPress={() => setSelectedAvatar(index)}>
-                            <Image
-                                source={avatar}
-                                style={[
-                                    styles.avatar,
-                                    selectedAvatar === index && styles.selectedAvatar,
-                                ]}
-                            />
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </View>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Soyisim"
+                            placeholderTextColor="#666"
+                            value={values.surname}
+                            onChangeText={handleChange("surname")}
+                            onBlur={handleBlur("surname")}
+                        />
+                        {touched.surname && errors.surname && <Text style={styles.errorText}>{errors.surname}</Text>}
 
-            <View style={styles.buttonContainer}>
-                <GeneralBtn color="#6661ebff" selfText="ÜYE OL" onPress={createAnAcoount} />
-                <View style={styles.loginRow}>
-                    <Text>Zaten bir hesabınız mı var?</Text>
-                    <TouchableOpacity onPress={() => router.push("/pages/LoginPage" as any)}>
-                        <Text style={{ color: "#6661ebff", marginHorizontal: 5 }}>Giriş</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Email"
+                            placeholderTextColor="#666"
+                            keyboardType="email-address"
+                            value={values.email}
+                            onChangeText={handleChange("email")}
+                            onBlur={handleBlur("email")}
+                        />
+                        {touched.email && errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Şifre"
+                            placeholderTextColor="#666"
+                            secureTextEntry
+                            value={values.password}
+                            onChangeText={handleChange("password")}
+                            onBlur={handleBlur("password")}
+                        />
+                        {touched.password && errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+
+                        <Text style={styles.avatarLabel}>Avatarını seç</Text>
+                        <View style={styles.avatarContainer}>
+                            {avatars.map((avatar, index) => (
+                                <TouchableOpacity key={index} onPress={() => setFieldValue("avatarIndex", index)}>
+                                    <Image
+                                        source={avatar}
+                                        style={[styles.avatar, values.avatarIndex === index && styles.selectedAvatar]}
+                                    />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                        {touched.avatarIndex && errors.avatarIndex && <Text style={styles.errorText}>{errors.avatarIndex}</Text>}
+
+                        <View style={styles.buttonContainer}>
+                            <GeneralBtn color="#6661ebff" selfText="ÜYE OL" onPress={handleSubmit as any} />
+                            <View style={styles.loginRow}>
+                                <Text>Zaten bir hesabınız mı var?</Text>
+                                <TouchableOpacity onPress={() => router.push("/pages/LoginPage" as any)}>
+                                    <Text style={{ color: "#6661ebff", marginHorizontal: 5 }}>Giriş</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                )}
+            </Formik>
         </ScrollView>
     );
 }
@@ -130,11 +158,6 @@ const styles = StyleSheet.create({
         width: 180,
         height: 180,
         marginBottom: 15,
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: "bold",
-        color: "#6661ebff",
     },
     formContainer: {
         width: "100%",
@@ -188,5 +211,11 @@ const styles = StyleSheet.create({
         marginTop: 10,
         alignItems: "center",
         justifyContent: "center",
+    },
+    errorText: {
+        color: "#b94e4eff",
+        marginBottom: 5,
+        alignSelf: "flex-start",
+        marginLeft: 15,
     },
 });
