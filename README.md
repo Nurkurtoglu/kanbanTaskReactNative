@@ -97,7 +97,7 @@ updated_at TIMESTAMP DEFAULT NOW()
 ![Giriş Sayfası](./kanbanTask/assets/images/mylogin.png)
 ![Üye Olma Sayfası](./kanbanTask/assets/images/mysignup.png)
 ![Ana Sayfa](./kanbanTask/assets/images/homepage1.png)
-![Görev Ekleme](./kanbanTask/assets/images/addtask1.png)
+![Görev Ekleme](./kanbanTask/assets/images/addtask.png)
 ![Görev Detay](./kanbanTask/assets/images/taskdetail.png)
 ![Kullanıcı Ayarları](./kanbanTask/assets/images/usersettigns1.png)
 
