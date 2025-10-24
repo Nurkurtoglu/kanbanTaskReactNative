@@ -94,13 +94,12 @@ updated_at TIMESTAMP DEFAULT NOW()
 
 ## 📸 Ekran Görüntüleri
 
-* `mylogin.png` — Giriş sayfası (.kanbanTask/assets/images/mylogin.png)
-* `mysignup.png` — Üye olma sayfası (kanbanTask/assets/images/mysignup.png)
-* `homepage.png` — Üye olma sayfası (kanbanTask/assets/images/homepage.png)
-* `addtask.png` — Görev ekleme ekranı (kanbanTask/assets/images/addtask.png)
-* `taskdetail.png` — Görev detay ekranı (kanbanTask/assets/images/taskdetail.png)
-* `usersettings.png` — Kullanıcı ayarları ekranı (kanbanTask/assets/images/usersettings.png)
-
+![Giriş Sayfası](./assets/images/mylogin.png)
+![Üye Olma Sayfası](./assets/images/mysignup.png)
+![Ana Sayfa](./assets/images/homepage.png)
+![Görev Ekleme](./assets/images/addtask.png)
+![Görev Detay](./assets/images/taskdetail.png)
+![Kullanıcı Ayarları](./assets/images/usersettings.png)
 
 ---
 
