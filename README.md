@@ -94,12 +94,12 @@ updated_at TIMESTAMP DEFAULT NOW()
 
 ## 📸 Ekran Görüntüleri
 
-![Giriş Sayfası](./assets/images/mylogin.png)
-![Üye Olma Sayfası](./assets/images/mysignup.png)
-![Ana Sayfa](./assets/images/homepage.png)
-![Görev Ekleme](./assets/images/addtask.png)
-![Görev Detay](./assets/images/taskdetail.png)
-![Kullanıcı Ayarları](./assets/images/usersettings.png)
+![Giriş Sayfası](./kanbanTask/assets/images/mylogin.png)
+![Üye Olma Sayfası](./kanbanTask/assets/images/mysignup.png)
+![Ana Sayfa](./kanbanTask/assets/images/homepage.png)
+![Görev Ekleme](./kanbanTask/assets/images/addtask.png)
+![Görev Detay](./kanbanTask/assets/images/taskdetail.png)
+![Kullanıcı Ayarları](./kanbanTask/assets/images/usersettings.png)
 
 ---
 
