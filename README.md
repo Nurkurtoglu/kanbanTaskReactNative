@@ -194,11 +194,3 @@ API_URL=http://192.168.1.25:5000   # bilgisayarının IP adresi ve backend portu
 
 ---
 
-## 📫 İletişim
-
-Sorular, hata bildirimleri veya katkı için:
-
-* Author: İkra Nur Kurtoğlu (veya GitHub kullanıcı adın)
-
----
-
