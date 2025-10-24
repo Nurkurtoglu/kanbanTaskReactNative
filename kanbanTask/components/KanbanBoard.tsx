@@ -9,6 +9,7 @@ import { getUserData } from '@/store/apiwithThunks/usersApi';
 import { avatars } from "@/types/avatarMap"
 import { User } from '@/types/user';
 import { Task } from '@/types/task';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 
 // Props interface'ini tanımla
@@ -44,8 +45,6 @@ export default function KanbanBoard({ title, color, status, taskss }: KanbanColu
     }, [dispatch, currentUser.length, statusUser]);
 
 
-
-    console.log("veriler ", tasks)
     console.log("users from state:", currentUser);
 
     // Filtrele
@@ -110,19 +109,24 @@ export default function KanbanBoard({ title, color, status, taskss }: KanbanColu
                             <Text style={styles.taskDescription} numberOfLines={2}>
                                 {item.description}
                             </Text>
-                            <View style={styles.userInfo}>
-                                {assigneeInfos.length > 0 ? (
-                                    assigneeInfos.map((user) => (
-                                        <View key={user.id} >
-                                            <Image
-                                                style={styles.avatarImg}
-                                                source={avatars[user.avatarIndex]}
-                                            />
-                                        </View>
-                                    ))
-                                ) : (
-                                    <Text >Atanmış kullanıcı yok</Text>
-                                )}
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <View style={styles.userInfo}>
+                                    {assigneeInfos.length > 0 ? (
+                                        assigneeInfos.map((user) => (
+                                            <View key={user.id} >
+                                                <Image
+                                                    style={styles.avatarImg}
+                                                    source={avatars[user.avatarIndex]}
+                                                />
+                                            </View>
+                                        ))
+                                    ) : (
+                                        <Text >Atanmış kullanıcı yok</Text>
+                                    )}
+                                </View>
+                                <View>
+                                    <Text style={styles.calendar}><FontAwesome name="calendar" size={12} color="#555" />   {item.created_at ? new Date(item.created_at).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}</Text>
+                                </View>
                             </View>
                         </TouchableOpacity>
                     );
@@ -183,7 +187,7 @@ const styles = StyleSheet.create({
         padding: 12,
         margin: 12,
         width: 300,
-        height: 180,
+        height: 160,
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -211,4 +215,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: 'red',
     },
+    calendar: {
+        fontSize: 12,
+        color: '#555',
+        margin: 8,
+    }
 })

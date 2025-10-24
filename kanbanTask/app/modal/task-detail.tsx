@@ -151,6 +151,14 @@ export default function TaskDetailModal() {
                 <Text style={{ color: "#878787ff" }}>Raporlayan: </Text>
                 <Text style={{ color: "#000000ff" }}>{reporter?.name} {reporter?.surname}</Text>
             </View>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
+                <TouchableOpacity style={{ borderRadius: 22, padding: 14, backgroundColor: "#114495ff" }}>
+                    <Text style={{ color: "#fff" }}>{taskData.status
+                        ? taskData.status.charAt(0).toUpperCase() + taskData.status.slice(1)
+                        : ''}</Text>
+                </TouchableOpacity>
+                <Text style={{ color: "#555" }}>{taskData.created_at ? new Date(taskData.created_at).toLocaleDateString('tr-TR') : 'Belirtilmemiş'}</Text>
+            </View>
 
             <Text style={{ color: "#878787ff", marginTop: 40 }}>Açıklama:</Text>
 
