@@ -115,8 +115,7 @@ updated_at TIMESTAMP DEFAULT NOW()
 ### 1) Repository'i klonla
 
 ```bash
-git clone https://github.com/kullanici_adi/gorev-yonetici-sistemi.git
-cd gorev-yonetici-sistemi
+git clone https://github.com/Nurkurtoglu/kanbanTaskReactNative.git
 ```
 
 ### 2) Backend kurulumu ve çalıştırma
